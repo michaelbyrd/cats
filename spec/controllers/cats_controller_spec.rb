@@ -20,19 +20,23 @@ describe CatsController do
   describe 'POST :create' do
     before {@cat_attributes = attributes_for(:cat)}
     it 'succeeds' do
-      post :create, cat: @cat_attributes, format: :json
-      expect(response).to have_http_status(:created) # created
+      post_cat :created
       data = JSON.parse(response.body)
       expect(data).to have_key('name')
-      expect(data['name']).to eq cat_attributes[:name]
+      expect(data['name']).to eq @cat_attributes[:name]
     end
 
     it 'fails when a field is empty' do
       @cat_attributes[:name] = nil
+      post_cat :unprocessable_entity
+    end
+
+    def post_cat(status)
       post :create, cat: @cat_attributes, format: :json
-      expect(response).to have_http_status(:unprocessable_entity)
+      expect(response).to have_http_status(status)
     end
   end
+
   it 'PATCH :update' do
     cat = create(:cat)
     patch :update, id: cat.id, cat: {name: 'Jasmine'}, format: :json
