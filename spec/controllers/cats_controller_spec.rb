@@ -36,12 +36,19 @@ describe CatsController do
       expect(response).to have_http_status(status)
     end
   end
-
-  it 'PATCH :update' do
-    cat = create(:cat)
-    patch :update, id: cat.id, cat: {name: 'Jasmine'}, format: :json
-    expect(response).to have_http_status(:no_content)
-    expect(Cat.find(cat.id).name).to eq 'Jasmine'
+  describe 'PATCH :update' do
+    before { @cat = create(:cat) }
+    it 'succeeds when valid data is changed' do
+      patch :update, id: @cat.id, cat: {name: 'Jasmine'}, format: :json
+      expect(response).to have_http_status(:no_content)
+      expect(Cat.find(@cat.id).name).to eq 'Jasmine'
+    end
+    it 'fails when a required field is missing' do
+      cat_name = @cat.name
+      patch :update, id: @cat.id, cat: {name: nil}, format: :json
+      expect(response).to have_http_status(:unprocessable_entry)
+      expect(Cat.find(@cat.id).name).to eq cat_name
+    end
   end
 
   it 'DELETE :destroy' do
